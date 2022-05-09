@@ -99,7 +99,7 @@ spl5 = make_interp_spline(x, y5_data, k=3)  # type: BSpline
 
 
 
-graph1_smooth = fig.add_subplot(1, 2, 1)
+graph1_smooth = fig.add_subplot(2, 2, 1)
 
 graph1_smooth.set_title('Accuracy per epoch')
 # plt.ylabel("Threat score")
@@ -118,7 +118,7 @@ plt.legend((p1[0], p2[0]), ('Training', 'Validation'), loc='lower right')
 
 
 
-graph2_smooth = fig.add_subplot(1, 2, 2)
+graph2_smooth = fig.add_subplot(2, 2, 2)
 
 graph2_smooth.set_title('Loss & learning rate per epoch')
 plt.ylabel("Loss")
@@ -139,9 +139,9 @@ p3 = plt.plot(xnew,graph3_smooth)
 plt.legend((p1[0], p2[0], p3[0]), ('Training', 'Validation', 'Learning rate'), loc='upper right')
 
 
-fig.tight_layout()
-plt.show()
-exit()
+# fig.tight_layout()
+# plt.show()
+# exit()
 
 cm = fig.add_subplot(2, 2, 3)
 cm.set_title(f'Floating point model confusion matrix\nAccuracy: {np.sum(np.diag(matrix_float))/np.sum(matrix_float):.5f}')

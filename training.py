@@ -405,8 +405,15 @@ R = []
 P = []
 
 
+#
+# data_names = ['100', '101', '102', '103', '104', '105', '106', '107',
+#               '108', '109', '111', '112', '113', '114', '115', '116',
+#               '117', '118', '119', '121', '122', '123', '124', '200',
+#               '201', '202', '203', '205', '207', '208', '209', '210',
+#               '212', '213', '214', '215', '217', '219', '220', '221',
+#               '222', '223', '228', '230', '231', '232', '233', '234']
 
-data_names = ['100', '101', '102', '103', '104', '105', '106', '107',
+data_names = ['100', '101', '103', '105', '106', '107',
               '108', '109', '111', '112', '113', '114', '115', '116',
               '117', '118', '119', '121', '122', '123', '124', '200',
               '201', '202', '203', '205', '207', '208', '209', '210',
@@ -468,8 +475,14 @@ printProgressBar(0, len(data_names), prefix = 'Dataset building:', suffix = '', 
 for d in data_names:
     r = wfdb.rdrecord('./dataset/raw/'+d)
     ann = wfdb.rdann('./dataset/raw/'+d, 'atr', return_label_elements=['label_store', 'symbol'])
-    sig = np.array(r.p_signal[:,0])
-    intsig = np.array(r.p_signal[:,0])
+    # sig = np.array(r.p_signal[:,0])
+    # intsig = np.array(r.p_signal[:,0])
+    if d!='114':
+        sig = np.array(r.p_signal[:,0])
+        intsig = np.array(r.p_signal[:,0])
+    else:
+        sig = np.array(r.p_signal[:,1])
+        intsig = np.array(r.p_signal[:,1])
     sig_len = len(sig)
     sym = ann.symbol
     pos = ann.sample
@@ -822,8 +835,8 @@ try:
 
             inputs, labels = data
 
-            print(len(inputs))
-            exit()
+            # print(len(inputs))
+            # exit()
 
             # zero the parameter gradients
             optimizer.zero_grad()

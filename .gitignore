@@ -1,7 +1,7 @@
 output/
 input/
-__pycache__/
 removeme/
+__pycache__/
 .ftpconfig
 .ftpconfig.cson
 .ftpignore

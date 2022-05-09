@@ -108,13 +108,21 @@ def animate(prefix = ''):
 
 
 
+#
+# data_names = ['100', '101', '102', '103', '104', '105', '106', '107',
+#               '108', '109', '111', '112', '113', '114', '115', '116',
+#               '117', '118', '119', '121', '122', '123', '124', '200',
+#               '201', '202', '203', '205', '207', '208', '209', '210',
+#               '212', '213', '214', '215', '217', '219', '220', '221',
+#               '222', '223', '228', '230', '231', '232', '233', '234']
 
-data_names = ['100', '101', '102', '103', '104', '105', '106', '107',
+data_names = ['100', '101', '103', '105', '106', '107',
               '108', '109', '111', '112', '113', '114', '115', '116',
               '117', '118', '119', '121', '122', '123', '124', '200',
               '201', '202', '203', '205', '207', '208', '209', '210',
               '212', '213', '214', '215', '217', '219', '220', '221',
               '222', '223', '228', '230', '231', '232', '233', '234']
+
 
 
 
@@ -578,12 +586,22 @@ with open(session_path+'peakpos.pickle', "wb") as output_file:
 # all_FP = 0
 # all_FN = 0
 labels = ['N', 'L', 'R', 'e', 'j', 'A', 'a', 'J', 'S', 'V', 'E', 'F', '/', 'f', 'Q']
+peak_label = ['N', 'L', 'R', 'e', 'j', 'A', 'a', 'J', 'S', 'V', 'E', 'F', '/', 'f', 'Q']
+peak_sub_labels = { 'N':'N', 'L':'N', 'R':'N', 'e':'N', 'j':'N',
+                   'A':'S', 'a':'S', 'J':'S', 'S':'S',
+                   'V':'V', 'E':'V',
+                   'F':'F',
+                   '/':'Q', 'f':'Q', 'Q':'Q'}
+# peak_label = ['N', 'L', 'R', 'A', 'V']
 
 
 
+peak_stat = {}
+peak_stat_fn = {}
 matrix_l = []
 matrix_p = []
 fp_pos = []
+fn_pos = []
 
 ind_file = 0
 ind_label = 0
@@ -600,10 +618,15 @@ for d, peakpos in zip(data_names, PEAKPOS):
     matrix_l.append([])
     matrix_p.append([])
     fp_pos.append([])
+    fn_pos.append([])
     r = wfdb.rdrecord('./dataset/raw/'+d)
     ann = wfdb.rdann('./dataset/raw/'+d, 'atr', return_label_elements=['label_store', 'symbol'])
-    sig = np.array(r.p_signal[:,0])
-    intsig = np.array(r.p_signal[:,0])
+    if d!='114':
+        sig = np.array(r.p_signal[:,0])
+        intsig = np.array(r.p_signal[:,0])
+    else:
+        sig = np.array(r.p_signal[:,1])
+        intsig = np.array(r.p_signal[:,1])
     sig_len = len(sig)
     sym = ann.symbol
     pos = ann.sample
@@ -615,6 +638,16 @@ for d, peakpos in zip(data_names, PEAKPOS):
     #         pos_filtered.append(p)
 
     pos_filtered = [p for p, s in zip(pos, sym) if s in labels]
+    label_filtered = [s for p, s in zip(pos, sym) if s in labels]
+
+    for [f1, f2] in zip(pos_filtered, label_filtered):
+        if f2 in peak_label:
+            if peak_sub_labels[f2] not in peak_stat:
+                peak_stat[peak_sub_labels[f2]] = 1
+            else:
+                peak_stat[peak_sub_labels[f2]] += 1
+
+
 
     beat_len = len(sym)
     beat_filtered_len = len(pos_filtered)
@@ -719,13 +752,17 @@ for d, peakpos in zip(data_names, PEAKPOS):
     for i in range(beat_filtered_len):
         matrix_l[ind_file].append([])
         for p in peakpos[tmp_index:]:
+            tmp_find = False
             if abs(pos_filtered[i] - p) <= tolerance:
                 matrix_l[ind_file][ind_label].append(pos_filtered[i])
                 matrix_l[ind_file][ind_label].append(p)
                 ind_peak = ind_peak + 1
                 tmp_index = tmp_index + 1
+                tmp_find = True
                 break
             ind_peak_t = ind_peak_t + 1
+        if not tmp_find:
+            fn_pos[ind_file].append([pos_filtered[i], label_filtered[i]])
         ind_peak = 0
         ind_peak_t = 0
         ind_label = ind_label + 1
@@ -768,6 +805,52 @@ sum = 0
 for f in fp_pos:
     sum += len(f)
 print(sum)
+
+
+
+print(fn_pos)
+
+sum = 0
+for f in fn_pos:
+    sum += len(f)
+print(sum)
+
+for fn in fn_pos:
+    for [f1, f2] in fn:
+        if f2 in peak_label:
+            if peak_sub_labels[f2] not in peak_stat_fn:
+                peak_stat_fn[peak_sub_labels[f2]] = 1
+            else:
+                peak_stat_fn[peak_sub_labels[f2]] += 1
+
+
+print('')
+print(peak_stat)
+print(peak_stat_fn)
+
+peak_stat_sum = 0
+for p in peak_stat:
+    peak_stat_sum += peak_stat[p]
+
+peak_stat_fn_sum = 0
+for p in peak_stat_fn:
+    peak_stat_fn_sum += peak_stat_fn[p]
+
+
+for p in peak_stat:
+    peak_stat[p] = peak_stat[p]/peak_stat_sum
+
+for p in peak_stat_fn:
+    peak_stat_fn[p] = peak_stat_fn[p]/peak_stat_fn_sum
+
+print('')
+print(peak_stat)
+print(peak_stat_fn)
+
+print('')
+
+
+
 
 
 
